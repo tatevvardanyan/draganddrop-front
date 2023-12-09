@@ -1,15 +1,17 @@
 import logo from './logo.svg';
 import './App.css';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import axios from 'axios';
 
-//primary scheme
 function App() {
-  const [cardList, setCardList] = useState([
-    { id: 100, order: 3, text: "card 3" },
-    { id: 101, order: 1, text: "card 1" },
-    { id: 102, order: 2, text: "card 2" },
-    { id: 103, order: 4, text: "card 4" },
-  ])
+  const [cardList, setCardList] = useState([])
+  useEffect(() => {
+    axios.get("http://localhost:8080/api")
+      .then((response) => {
+        setCardList(response.data)
+      })
+  }, [])
+
   const [currentCard, setCurrenCard] = useState(null)
   function dragStartHandler(e, card) {
     console.log("drag", card)
@@ -21,11 +23,11 @@ function App() {
   }
   function dragOverHandler(e) {
     e.preventDefault()
-    e.target.style.background = 'lightgray'
+    e.target.style.background = 'gray'
   }
   function dropHandler(e, card) {
     e.preventDefault()
-    // console.log("drop",card)
+    console.log("drop", card)
     setCardList(cardList.map(e => {
       if (e.id === card.id) {
         return { ...e, order: currentCard.order }
@@ -47,7 +49,7 @@ function App() {
   }
 
   return (
-    <div>
+    <div className={'big'}>
       <h1>Drag And Drop</h1>
       <p>first project</p>
       <div className='app'>
@@ -59,7 +61,7 @@ function App() {
             onDragOver={(e) => dragOverHandler(e)}
             onDrop={(e) => dropHandler(e, card)}
             draggable={true}>
-            {card.text}
+            <img src={card.img} />
           </div>
         )}
       </div>
