@@ -1,10 +1,10 @@
-import logo from './logo.svg';
 import './App.css';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 
 function App() {
   const [cardList, setCardList] = useState([])
+  const [currentCard, setCurrenCard] = useState(null)
   useEffect(() => {
     axios.get("http://localhost:8080/api")
       .then((response) => {
@@ -12,7 +12,6 @@ function App() {
       })
   }, [])
 
-  const [currentCard, setCurrenCard] = useState(null)
   function dragStartHandler(e, card) {
     console.log("drag", card)
     setCurrenCard(card)
@@ -28,15 +27,11 @@ function App() {
   function dropHandler(e, card) {
     e.preventDefault()
     console.log("drop", card)
-    setCardList(cardList.map(e => {
-      if (e.id === card.id) {
-        return { ...e, order: currentCard.order }
-      }
-      if (e.id === currentCard.id) {
-        return { ...e, order: card.order }
-      }
-      return e
-    }))
+    const id1=card.id
+    const id2=currentCard.id
+    axios.put(`http://localhost:8080/api/drop/${id1}/${id2}`).then((response) => {
+      setCardList(response.data)
+    })
     e.target.style.background = 'white'
 
   }
@@ -47,11 +42,17 @@ function App() {
       return -1
     }
   }
-
+ function refresh(e){
+  e.preventDefault()
+  axios.get(`http://localhost:8080/api/take`).then((response) => {
+    setCardList(response.data)
+  })
+ }
   return (
     <div className={'big'}>
       <h1>Drag And Drop</h1>
       <p>first project</p>
+      {/* <button onClick={(e)=>refresh(e)}>Get New</button> */}
       <div className='app'>
         {cardList.sort(sort).map(card =>
           <div className={'card'} key={card.id}
